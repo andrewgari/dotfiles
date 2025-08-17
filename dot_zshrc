@@ -1,19 +1,33 @@
-# ~/.zshrc - Portable Zsh Configuration
-# Add both variables to be thorough
-export EDITOR=nvim
-export VISUAL=nvim
+#!/usr/bin/env zsh
+# ~/.zshrc - Zsh configuration
 
-# fzf setup
-eval "$(fzf --zsh)"  # or --zsh for zsh
-# zoxide setup - replace cd command
-eval "$(zoxide init zsh --cmd cd)"  # or --bash with zsh
+# -----------------------------
+# Load unified shell modules
+# -----------------------------
+[ -f ~/.shell/exports.sh ] && source ~/.shell/exports.sh
+[ -f ~/.shell/aliases.sh ] && source ~/.shell/aliases.sh
+[ -f ~/.shell/functions.sh ] && source ~/.shell/functions.sh
+[ -f ~/.shell/local.sh ] && source ~/.shell/local.sh
 
-# fzf options (updated for eza)
-export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'bat --color=always --style=numbers --line-range=:500 {}' 2>/dev/null"
-export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {}' 2>/dev/null"
-export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+# -----------------------------
+# Zsh-specific settings
+# -----------------------------
 
-# Install Zinit (Zsh Plugin Manager)
+# History settings
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_FIND_NO_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_BEEP
+setopt SHARE_HISTORY
+
+# -----------------------------
+# Zinit Plugin Manager Setup
+# -----------------------------
+
+# Install Zinit if not present
 if [[ ! -f "$HOME/.zinit/bin/zinit.zsh" ]]; then
     echo "⚡ Installing Zinit (Zsh plugin manager)..."
     mkdir -p "$HOME/.zinit" && git clone https://github.com/zdharma-continuum/zinit.git "$HOME/.zinit/bin"
@@ -21,51 +35,27 @@ fi
 source "$HOME/.zinit/bin/zinit.zsh"
 
 # -----------------------------
-# Machine-Specific Configuration
-# -----------------------------
-
-# Load machine-specific settings if present
-if [ -f ~/.zshrc.local ]; then
-    source ~/.zshrc.local
-fi
-
-# -----------------------------
-# Aliases
-# -----------------------------
-
-# Load global aliases (shared across systems)
-if [ -f ~/.zsh-aliases ]; then
-    source ~/.zsh-aliases
-fi
-
-if [ -f ~/.zsh-aliases.local ]; then
-    source ~/.zsh-aliases.local
-fi
-
-export SOFTWARE_UPDATE_AVAILABLE='📦 '
-
-# -----------------------------
-# Key Bindings (History Search)
+# Key Bindings
 # -----------------------------
 
 # History search with up/down arrows
-bindkey '^[[A' history-search-backward  # Up Arrow for history search
-bindkey '^[[B' history-search-forward   # Down Arrow for history search
+bindkey '^[[A' history-search-backward
+bindkey '^[[B' history-search-forward
 
 # Word navigation
-bindkey '^[[1;5C' forward-word          # Ctrl + →
-bindkey '^[[1;5D' backward-word         # Ctrl + ←
-bindkey '^H' backward-kill-word         # Ctrl + Backspace
-bindkey '^U' backward-kill-line         # Ctrl + U
-bindkey '^L' clear-screen               # Ctrl + L
-bindkey '^[q' kill-whole-line           # Alt + Q
-bindkey -M viins '^[[Z' reverse-menu-complete  # Shift + Tab
+bindkey '^[[1;5C' forward-word
+bindkey '^[[1;5D' backward-word
+bindkey '^H' backward-kill-word
+bindkey '^U' backward-kill-line
+bindkey '^L' clear-screen
+bindkey '^[q' kill-whole-line
+bindkey -M viins '^[[Z' reverse-menu-complete
 
-# Add Emacs-like bindings
-bindkey '^A' beginning-of-line          # Ctrl + A
-bindkey '^E' end-of-line                # Ctrl + E
-bindkey '^K' kill-line                  # Ctrl + K
-bindkey '^R' history-incremental-search-backward  # Ctrl + R
+# Emacs-like bindings
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^K' kill-line
+bindkey '^R' history-incremental-search-backward
 
 # -----------------------------
 # Completion System
@@ -73,71 +63,81 @@ bindkey '^R' history-incremental-search-backward  # Ctrl + R
 
 autoload -Uz compinit && compinit
 
-# Enable additional completion scripts if installed
+# Completion styling
 zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive matching
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # Colored completion items
-zstyle ':completion:*' special-dirs true # Complete special directories like .. and ~
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' special-dirs true
 
 # -----------------------------
-# Plugins (Managed via zinit)
+# Zsh Plugins (via Zinit)
 # -----------------------------
 
 # Syntax highlighting
 zinit light zsh-users/zsh-syntax-highlighting
 
-# Autosuggestions (gray text suggesting previous commands)
+# Autosuggestions
 zinit light zsh-users/zsh-autosuggestions
 
-# Fast syntax highlighting (already loaded below)
-
-# Fuzzy finder for command history and completions
+# Fuzzy finder integration
 zinit light Aloxaf/fzf-tab
 
-# Colored suggestions, e.g., `git` commands
-zinit light zdharma-continuum/history-search-multi-word
+# Additional completions
+zinit light zsh-users/zsh-completions
 
-# Enhance directory navigation (`..` auto-expands)
+# Enhanced directory navigation
 zinit light rupa/z
 
-# Git plugin with improved aliases and completion
+# Fast syntax highlighting
 zinit ice wait lucid atload"alias gst='git status'"
 zinit light zdharma-continuum/fast-syntax-highlighting
 
-# Adds extra completions for common tools
-zinit light zsh-users/zsh-completions
+# History search
+zinit light zdharma-continuum/history-search-multi-word
 
-# -----------------------------
-# Fuzzy Finder (`fzf`)
-# -----------------------------
-
-# Use `fzf` if installed for interactive completion
+# FZF plugins
 if command -v fzf &>/dev/null; then
-    export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
     zinit light junegunn/fzf
     zinit light junegunn/fzf-git.sh
 fi
 
 # -----------------------------
-# Run Fastfetch (If Installed)
+# Tool Initializations
 # -----------------------------
 
-if command -v fastfetch &>/dev/null; then
-    fastfetch
+# Starship prompt
+if command -v starship &>/dev/null; then
+    eval "$(starship init zsh)"
+fi# FZF integration
+if command -v fzf &>/dev/null; then
+    eval "$(fzf --zsh)"
 fi
 
+# Zoxide integration
+if command -v zoxide &>/dev/null; then
+    eval "$(zoxide init zsh --cmd cd)"
+    
+    # Zoxide-specific aliases for zsh
+    alias z='zoxide query --exclude "$(pwd)"'
+    alias zi='zoxide query --interactive'
+    alias za='zoxide add'
+    alias zr='zoxide remove'
+    alias zri='zoxide remove --interactive'
+fi
+
+# -----------------------------
+# Scripts directory setup
+# -----------------------------
 if [ -d "$HOME/.scripts" ]; then
     find "$HOME/.scripts" -type f -not -perm -u+x -exec chmod +x {} \;
 fi
 
-# Path management - remove duplicate entries
+# Remove duplicate PATH entries (zsh-specific)
 typeset -U PATH
-export PATH=~/.npm-global/bin:$PATH
-export PATH=~/.local/bin:$PATH
-export PATH=$PATH:/home/andrewgari/.cargo/bin
 
-# Ensure we're not using fd as a replacement for find
-unalias find 2>/dev/null
-export DISPLAY=:0
-
-eval "$(starship init zsh)"
+# -----------------------------
+# Welcome message
+# -----------------------------
+if command -v fastfetch &>/dev/null; then
+    fastfetch
+fi

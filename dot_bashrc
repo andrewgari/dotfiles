@@ -1,51 +1,32 @@
-# -----------------------------
-# Environment Variables
-# -----------------------------
-
-
-export SOFTWARE_UPDATE_AVAILABLE='📦 '
+#!/usr/bin/env bash
+# ~/.bashrc - Bash configuration
 
 # -----------------------------
-# Aliases
+# Load unified shell modules
+# -----------------------------
+[ -f ~/.shell/exports.sh ] && source ~/.shell/exports.sh
+[ -f ~/.shell/aliases.sh ] && source ~/.shell/aliases.sh
+[ -f ~/.shell/functions.sh ] && source ~/.shell/functions.sh
+[ -f ~/.shell/local.sh ] && source ~/.shell/local.sh
+
+# -----------------------------
+# Bash-specific settings
 # -----------------------------
 
-# Source aliases from ~/.aliases if it exists
-if [ -f ~/.aliases ]; then
-    source ~/.aliases
-fi
-
-# -----------------------------
-# History Settings
-# -----------------------------
-
-HISTSIZE=100000
-HISTFILESIZE=100000
-HISTFILE="$HOME/.bash_history"
-
-# Ignore duplicate commands and unnecessary blanks
-export HISTCONTROL=ignoredups:erasedups
+# History settings (bash-specific behavior)
 shopt -s histappend         # Append to history instead of overwriting
 shopt -s cmdhist            # Save multi-line commands as a single entry
 
-# Share history across terminals (Bash does not have `SHARE_HISTORY` like Zsh)
+# Share history across terminals
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 # -----------------------------
 # Key Bindings (History Search)
 # -----------------------------
 
-# Enable arrow key history search (like Zsh’s fuzzy search)
+# Enable arrow key history search
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
-
-# -----------------------------
-# Prompt Enhancements
-# -----------------------------
-
-# Use Starship if installed
-if command -v starship &>/dev/null; then
-    eval "$(starship init bash)"
-fi
 
 # -----------------------------
 # Completion System
@@ -56,21 +37,32 @@ if [ -f /etc/bash_completion ]; then
     source /etc/bash_completion
 fi
 
-# Syntax highlighting (Bash equivalent of Zsh's zsh-syntax-highlighting)
 if [ -f /usr/share/bash-completion/bash_completion ]; then
     source /usr/share/bash-completion/bash_completion
 fi
 
-# Install and use `highlight` if available (alternative to Zsh syntax highlighting)
-if command -v source-highlight &>/dev/null; then
-    alias highlight='source-highlight --failsafe --style-file=esc.style -o STDOUT -i'
+# -----------------------------
+# Tool Initializations
+# -----------------------------
+
+# Starship prompt
+if command -v starship &>/dev/null; then
+    eval "$(starship init bash)"
 fi
 
-fastfetch
+# FZF integration
+if command -v fzf &>/dev/null; then
+    eval "$(fzf --bash)"
+fi
 
-export PATH=~/.npm-global/bin:$PATH
-export PATH=~/.npm-global/bin:$PATH
-export PATH=~/.npm-global/bin:$PATH
-export PATH=~/.npm-global/bin:$PATH
+# Zoxide integration
+if command -v zoxide &>/dev/null; then
+    eval "$(zoxide init bash --cmd cd)"
+fi
 
-alias claude="/home/andrewgari/.claude/local/claude"
+# -----------------------------
+# Welcome message
+# -----------------------------
+if command -v fastfetch &>/dev/null; then
+    fastfetch
+fi

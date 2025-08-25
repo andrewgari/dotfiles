@@ -108,7 +108,8 @@ fi
 # Starship prompt
 if command -v starship &>/dev/null; then
     eval "$(starship init zsh)"
-fi# FZF integration
+fi
+# FZF integration
 if command -v fzf &>/dev/null; then
     eval "$(fzf --zsh)"
 fi

@@ -77,6 +77,3 @@ end
 if status is-interactive; and command -v fastfetch &>/dev/null
     fastfetch
 end
-
-# Source custom aliases
-source ~/.config/fish/aliases.fish

@@ -1,0 +1,12 @@
+# Added by import prep on 20251111-133336
+.ssh/*
+.netrc
+.gnupg/*
+.local/share/Trash/
+.cache/
+.config/**/Cache/
+.config/**/cache/
+.config/**/CachedData/
+.npm/_cacache/
+Downloads/
+Desktop/

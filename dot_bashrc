@@ -1,68 +1,56 @@
-#!/usr/bin/env bash
-# ~/.bashrc - Bash configuration
+# If not running interactively, don't do anything (leave this at the top of this file)
+[[ $- != *i* ]] && return
 
-# -----------------------------
-# Load unified shell modules
-# -----------------------------
-[ -f ~/.shell/exports.sh ] && source ~/.shell/exports.sh
-[ -f ~/.shell/aliases.sh ] && source ~/.shell/aliases.sh
-[ -f ~/.shell/functions.sh ] && source ~/.shell/functions.sh
-[ -f ~/.shell/local.sh ] && source ~/.shell/local.sh
+# All the default Omarchy aliases and functions
+# (don't mess with these directly, just overwrite them here!)
+source ~/.local/share/omarchy/default/bash/rc
 
-# -----------------------------
-# Bash-specific settings
-# -----------------------------
+# Add your own exports, aliases, and functions here.
+#
+# Make an alias for invoking commands you use constantly
+# alias p='python'
 
-# History settings (bash-specific behavior)
-shopt -s histappend         # Append to history instead of overwriting
-shopt -s cmdhist            # Save multi-line commands as a single entry
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/andrewgari/.lmstudio/bin"
+# End of LM Studio CLI section
+ai() {
+  local prompt="$*"
+  echo "🤖 $prompt"
+  response=$(curl -s http://localhost:11434/api/generate \
+    -d "{\"model\":\"llama3.1\",\"prompt\":\"$prompt\"}" \
+    | jq -r '.response' | tee /tmp/ai_response.txt)
 
-# Share history across terminals
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+  echo ""
+  echo "$response"
+  echo ""
 
-# -----------------------------
-# Key Bindings (History Search)
-# -----------------------------
+  # Ask if user wants to execute any shell command proposed
+  if echo "$response" | grep -qE '^(\$|sudo|ls|cd|cp|mv|rm|apt|dnf|ssh|rsync|docker)'; then
+    echo "⚙️  The response seems to contain commands. Run them? (y/n)"
+    read -r ans
+    if [[ "$ans" == "y" ]]; then
+      echo "$response" | grep '^[[:alnum:]/~.$]' | while read -r cmd; do
+        echo "👉 $cmd"
+        eval "$cmd"
+      done
+    fi
+  fi
+}
 
-# Enable arrow key history search
-bind '"\e[A": history-search-backward'
-bind '"\e[B": history-search-forward'
 
-# -----------------------------
-# Completion System
-# -----------------------------
+# youtube-dl alias
+alias youtube-dl='/home/andrewgari/workspace/installations/youtube-dl-env/bin/youtube-dl'
 
-# Enable programmable completion
-if [ -f /etc/bash_completion ]; then
-    source /etc/bash_completion
-fi
+# youtube-dl helper function with cookies
+ytdl() {
+    /home/andrewgari/workspace/installations/youtube-dl-env/bin/youtube-dl \
+        --cookies ~/Downloads/www.youtube.com_cookies.txt \
+        "$@"
+}
 
-if [ -f /usr/share/bash-completion/bash_completion ]; then
-    source /usr/share/bash-completion/bash_completion
-fi
-
-# -----------------------------
-# Tool Initializations
-# -----------------------------
-
-# Starship prompt
-if command -v starship &>/dev/null; then
-    eval "$(starship init bash)"
-fi
-
-# FZF integration
-if command -v fzf &>/dev/null; then
-    eval "$(fzf --bash)"
-fi
-
-# Zoxide integration
-if command -v zoxide &>/dev/null; then
-    eval "$(zoxide init bash --cmd cd)"
-fi
-
-# -----------------------------
-# Welcome message
-# -----------------------------
-if command -v fastfetch &>/dev/null; then
-    fastfetch
-fi
+# youtube-dl helper function with newer cookies file (has spaces in name)
+ytdl-new() {
+    /home/andrewgari/workspace/installations/youtube-dl-env/bin/youtube-dl \
+        --cookies ~/Downloads/"www.youtube.com_cookies (1).txt" \
+        "$@"
+}
